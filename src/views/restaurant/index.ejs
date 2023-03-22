@@ -1,0 +1,65 @@
+<%- include('../partials/header', { 
+    tittle: 'Restaurants',
+    addStyles: true, 
+    styles:
+        [ 'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css',
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css' ]
+}); %>
+    <!-- Page content-->
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Restaurants</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-plus"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-filter"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-xs-12 mt-3">
+            <div class="card"><!-- border-0 -->
+                <div class="card-body">
+                    <table
+                        id="listRestaurants"
+                        data-toolbar="#toolbar"
+                        data-toggle="table"
+                        data-ajax="restRequest"
+                        data-search="true"
+                        data-pagination="true"
+                        data-show-refresh="true"
+                        data-show-fullscreen="true"
+                        data-show-columns="true"
+                        data-locale="es-MX"
+                        data-row-style="rowStyle"
+                        data-page-size="50"
+                        class="tableRestaurants">
+                        <thead>
+                            <tr>
+                                <th data-field="IdClient" data-sortable="true">Client</th>
+                                <th data-field="IdRestaurant">IdRest</th>
+                                <th data-field="Zone" data-sortable="true">Zone</th>
+                                <th data-field="Name">Name</th>
+                                <th data-field="Country">Country</th>
+                                <th data-field="City" data-sortable="true">City</th>
+                                <th data-field="Address" data-visible="false">Address</th>
+                                <th data-field="OpenNow" data-visible="false">OpenNow</th>
+                                <th data-field="IsActive" data-sortable="true" data-align="center">IsActive</th>
+                                <th data-field="Events" data-formatter="rowsOptionsRestaurant"  data-click-to-select="false">Events</th>
+                                <th data-field="Id" data-visible="false">Id</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<%- include('../partials/footer', { 
+    addScripts: true, 
+    scripts: [
+        'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js',
+        'https://unpkg.com/bootstrap-table@1.20.2/dist/locale/bootstrap-table-es-MX.min.js',
+        '/js/restaurant.js'
+    ]
+}); %>

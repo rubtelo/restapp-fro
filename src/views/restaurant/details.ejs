@@ -1,0 +1,80 @@
+<%- include('../partials/header', { 
+    tittle: 'Restaurant',
+    addStyles: true, 
+    styles:
+        [ 'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css',
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css' ]
+}); %>
+    <!-- Page content-->
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Details Restaurant</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-reply"></i></a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"><i class="fa-regular fa-pen-to-square"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <input type="hidden" name="uidl" id="uidl" value="<%= data.restaurant[0].IdRestaurant %>">
+            <textarea class="form-control" rows="3"><%= JSON.stringify(data.restaurant) %></textarea>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-xs-12 mt-3">
+            <div class="card"><!-- border-0 -->
+                <div class="card-body">
+                    <div id="toolbar" class="btn-group" role="group" aria-label="Basic example">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddMenu"><i class="fa fa-plus"></i></button>
+                        <!-- <button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-user-check"></i></button> -->
+                    </div>
+
+                    <table
+                        data-toggle="table"
+                        data-search="true"
+                        data-toolbar="#toolbar"
+                        data-show-columns="true">
+                        <thead>
+                            <tr>
+                                <th data-field="IdMenu">IdMenu</th>
+                                <th data-field="Category">Category</th>
+                                <th data-field="Name">Name</th>
+                                <th data-field="Price">Price</th>
+                                <th data-field="Observations">Observations</th>
+                                <th data-field="Active" data-align="center">Active</th>
+                                <th data-field="Events"  data-events="menuEvents" data-align="center">Events</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% data.menus.map((menu) => { %>
+                            <tr>
+                                <td><%= menu.IdMenu %></td>
+                                <td><%= menu.Category %></td>
+                                <td><%= menu.Name %></td>
+                                <td><%= menu.Price %></td>
+                                <td><%= menu.Observations %></td>
+                                <td><%- menu.IsActive %></td>
+                                <td>
+                                    <div class="btn-group" role="group" aria-label="restaurant options">
+                                        <button type="button" class="btn btn-sm btn-outline-primary menuContent" data-id="<%= menu.IdMenu %>"><i class="fa-solid fa-plate-wheat"></i></button>
+                                        <button type="button" class="btn btn-sm btn-outline-warning menuEdit" data-id="<%= menu.IdMenu %>"><i class="fa-regular fa-pen-to-square"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<%- include('../partials/footer', { 
+    addScripts: true, 
+    scripts: [
+        'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js',
+        'https://unpkg.com/bootstrap-table@1.20.2/dist/locale/bootstrap-table-es-MX.min.js',
+        '/js/restaurant.js'
+    ]
+}); %>
