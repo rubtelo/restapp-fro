@@ -18,7 +18,7 @@
         </div>
 
         <div class="col-lg-12 col-md-12 col-xs-12 mt-3">
-            <div class="card"><!-- border-0 -->
+            <div class="card">
                 <div class="card-body">
                     <table
                         id="listRestaurants"
@@ -43,9 +43,9 @@
                                 <th data-field="Country">Country</th>
                                 <th data-field="City" data-sortable="true">City</th>
                                 <th data-field="Address" data-visible="false">Address</th>
-                                <th data-field="OpenNow" data-visible="false">OpenNow</th>
+                                <th data-field="OpenNow"  data-align="center" data-formatter="rowsOpenNow">OpenNow</th>
                                 <th data-field="IsActive" data-sortable="true" data-align="center">IsActive</th>
-                                <th data-field="Events" data-formatter="rowsOptionsRestaurant"  data-click-to-select="false">Events</th>
+                                <th data-field="Events" data-formatter="rowsOptionsRestaurant" data-click-to-select="false">Events</th>
                                 <th data-field="Id" data-visible="false">Id</th>
                             </tr>
                         </thead>

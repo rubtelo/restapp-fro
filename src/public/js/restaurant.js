@@ -5,6 +5,15 @@ var restRequest = (params) => {
     });
 };
 
+var rowsOpenNow = (value, row, index) => {
+    let state = (row.OpenNow == 1) ? 0 : 1; 
+    var openIco = "fa-store"; 
+    var openColor = "text-success"; 
+    var openData = JSON.stringify({id: row.IdRestaurant, open: state});
+    if(row.OpenNow == false) { openIco = "fa-store-slash"; openColor = "text-danger-cool"; }
+
+    return [`<i class="fa-solid ${openIco} ${openColor} fa-lg" onclick='openNow(${openData})' style="cursor:pointer;"></i>`].join('');
+};
 
 var rowsOptionsRestaurant = (value, row, index) => {
     return [`<div class="btn-group" role="group" aria-label="restaurant_options">
@@ -12,21 +21,58 @@ var rowsOptionsRestaurant = (value, row, index) => {
             </div>`].join('');
 };
 
+var showMenus = (data) => {
+    const did = `i-${data.id}`;
+    $.ajax({
+        url: "/restaurants/showmenu",
+        data: data,
+        type: "put",
+        beforeSend: () => {
+            document.getElementById(did).innerHTML = '<i class="fa-solid fa-sync fa-spin"></i>';
+        },
+        success: (e) => {
+            if(e.success == true){
+                location.reload();
+            } else {
+                document.getElementById(did).innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            }
+        }
+    });
+};
+
+var openNow = (data) => {
+    var check = data.open == 1 ? "Open" : "Close";
+    var dialog = confirm(`${check} restaurant?`);
+    if (dialog) {
+        const cnfOp = { url: '/restaurants/open', params: data, type: 'put' };
+        const openExe = execAjax(cnfOp);
+        if(openExe.success == true) { 
+            location.reload();
+        }
+    }
+};
+
 var deleteContent = (id) => {
+    onOverlay();
     const cnfDc = { url: '/restaurants/content', params: {id}, type: 'delete' };
     const delContent = execAjax(cnfDc);
     if(delContent.success == true) { 
         const rowId = document.querySelector(`#c_${id}`);
         const row = rowId.parentNode.parentNode;
-        row.remove();
+        setTimeout(() => {
+            row.remove();
+            offOverlay();
+        }, 1000);
     }
 };
+
 
 /* Events */
 document.addEventListener('DOMContentLoaded', function () {
 
     /* buttons */
     const btnAddMenu = document.getElementById("btnAddMenu");
+    let showMenu = document.querySelectorAll(".showMenu");
 
     // bootstrap-table
     const $table = $('#listRestaurants');
@@ -44,13 +90,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // list Content
             const dataFil = {idMenu: row.IdMenu};
             const cnfCt = { url: '/restaurants/menuContent', params: dataFil, type: 'get' };
-            const Content = execAjax(cnfCt);
+            const content = execAjax(cnfCt);
 
             var contenido = '<form id="formAddMenuContent" class="row g-3">';
             contenido += '    <input type="hidden" name="idMenu" id="idMenu">';
-            contenido += '    <div class="col-4">';
-            contenido += '        <label for="field" class="form-label">Tag</label>';
-            contenido += '        <select class="form-select" aria-label="Field select" name="idTag" id="idTag">';
+            contenido += '    <div class="col-6">';
+            contenido += '        <select class="form-select select2" aria-label="Field select" name="idTag" id="idTag">';
             contenido += '            <option value="" disabled selected>Select...</option>';
             Tags.data.map((tag) => {
             contenido += `            <option value="${tag.idTag}">${tag.tag}</option>`;
@@ -58,17 +103,15 @@ document.addEventListener('DOMContentLoaded', function () {
             contenido += '        </select>';
             contenido += '    </div>';
             contenido += '    <div class="col-6">';
-            contenido += '        <label for="field" class="form-label">Observations</label>';
-            contenido += '        <input type="text" class="form-control" name="observations" id="observations">';
-            contenido += '    </div>';
-            contenido += '    <div class="col-1">';
-            contenido += '        <label for="field" class="form-label">&nbsp;</label>';
-            contenido += '        <button type="button" class="btn btn-success" id="btnAddContent"><i class="fa-solid fa-plus"></i></button>';
+            contenido += '        <div class="input-group">';
+            contenido += '            <input type="text" class="form-control" name="observations" id="observations" placeholder="Observations" aria-label="Observations" aria-describedby="btnAddContent">';
+            contenido += '            <button class="btn btn-outline-success" type="button" id="btnAddContent"><i class="fa-solid fa-plus"></i></button>';
+            contenido += '        </div>';
             contenido += '    </div>';
             contenido += '</form>';
             contenido += '<div class="col-12 mt-3">';
             contenido += '    <table class="table table-border" id="tableContents">';
-            Content.data.map((item) => {
+            content.data.map((item) => {
             contenido += '        <tr>';
             contenido += `            <td>${cont}</td>`;
             contenido += `            <td>${item.Tag}</td>`;
@@ -85,6 +128,9 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelector('.modal-title').innerHTML = "Menu Content";
             document.querySelector('.modal-body').innerHTML = contenido;
             document.getElementById("btnAceptar").remove();
+
+            // select2
+            $('.select2').select2({ dropdownParent: $('#modalGral') });
 
             var myModal = new bootstrap.Modal(document.querySelector('.modal'), { keyboard: false, backdrop: "static" });
             myModal.show();
@@ -112,6 +158,83 @@ document.addEventListener('DOMContentLoaded', function () {
                             notfound += '    <hr><p class="mb-0">check the data and try again</p>';
                             notfound += '</div>';
                             document.getElementById("formAddMenuContent").innerHTML = notfound;
+                        }
+                    }
+                });
+            });
+        },
+        'click .menuEdit': (e, value, row, index) => {
+            cleanModal();
+
+            // load Regions
+            const cnfCt = { url: '/categories', params: '', type: 'get' };
+            const listCateg = execAjax(cnfCt);
+
+            var contenido = '<form id="formEditMenu" class="row g-3">';
+            contenido += `    <input type="hidden" name="idMenu" id="idMenu" value="${row.IdMenu}">`;
+            contenido += `    <input type="hidden" name="idRestaurant" id="idRestaurant" value="${row.IdRestaurant}">`;
+            contenido += '    <div class="col-6">';
+            contenido += '        <label for="field" class="form-label">name</label>';
+            contenido += `        <input type="text" class="form-control" name="name" id="name" value="${row.Name}">`;
+            contenido += '    </div>';
+            contenido += '    <div class="col-6">';
+            contenido += '        <label for="field" class="form-label">Category</label>';
+            contenido += '        <select class="form-select" aria-label="category menu" name="idCategory" id="idCategory">';
+            contenido += '            <option value="" disabled selected>Select...</option>';
+            listCateg.results.map((categ) => {
+            contenido += `            <option value="${categ.id}">${categ.text}</option>`;
+            });
+            contenido += '        </select>';
+            contenido += '    </div>';
+            contenido += '    <div class="col-6">';
+            contenido += '        <label for="field" class="form-label">price</label>';
+            contenido += `        <input type="text" class="form-control" name="price" id="price" value="${row.Price}">`;
+            contenido += '    </div>';
+            contenido += '    <div class="col-6">';
+            contenido += '        <label for="field" class="form-label">observations</label>';
+            contenido += `        <input type="text" class="form-control" name="observations" id="observations" value="${row.Observations}">`;
+            contenido += '    </div>';
+
+            contenido += '    <div class="col-6">';
+            contenido += '        <label for="field" class="form-label">Status</label>';
+            contenido += '        <select class="form-select" aria-label="status menu" name="status" id="status">';
+            contenido += `            <option value="1">Enable</option>`;
+            contenido += `            <option value="2">Disable</option>`;
+            contenido += `            <option value="3" style="color:red;">Delete</option>`;
+            contenido += '        </select>';
+            contenido += '    </div>';
+            contenido += '</form>';
+
+            const cls = ["text-white"];
+            document.querySelector('.modal-header').classList.add(...cls);
+            document.querySelector('.modal-title').innerHTML = "edit menu";
+            document.querySelector('.modal-body').innerHTML = contenido;
+
+            document.getElementById('idCategory').value = row.IdCategory;
+            document.getElementById('status').value = row.IsActive == 1 ? 1 : 2;
+
+            var myModal = new bootstrap.Modal(document.querySelector('.modal'), { keyboard: false, backdrop: "static" });
+            myModal.show();
+
+            // aceptar
+            document.getElementById("btnAceptar").addEventListener("click", () => {
+                $.ajax({
+                    url: "/restaurants/editMenu",
+                    data: $("#formEditMenu").serialize(),
+                    type: "put",
+                    beforeSend: () => { onOverlay(); },
+                    success: (e) => {
+                        if(e.success == true){
+                            location.reload();
+                        } else {
+                            offOverlay();
+                            var notfound = '<div class="alert alert-danget" role="alert">';;
+                            notfound += '    <h4 class="alert-heading">Alert!</h4>';
+                            notfound += `    <p>${e.message}</p>`
+                            notfound += '    <hr><p class="mb-0">check the data and try again</p>';
+                            notfound += '</div>';
+                            document.getElementById("formEditMenu").innerHTML = notfound;
+                            document.getElementById("btnAceptar").remove();
                         }
                     }
                 });
@@ -185,4 +308,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    /* show menu */
+    if(showMenu) {
+        showMenu.forEach((item) => {
+            item.setAttribute("onclick", `showMenus(${item.dataset.id})`);
+        });
+    }
 });

@@ -3,8 +3,10 @@
     addStyles: true, 
     styles:
         [ 'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.css',
-        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css' ]
+        'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css',
+        'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css' ]
 }); %>
+    <% const rest = data.restaurant[0]; %>
     <!-- Page content-->
     <div class="container-fluid">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -12,22 +14,64 @@
             <div class="btn-toolbar mb-2 mb-md-0">
                 <div class="btn-group me-2">
                     <a href="#" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-reply"></i></a>
-                    <button type="button" class="btn btn-sm btn-outline-secondary"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="alert('Temporarily out of service');"><i class="fa-regular fa-pen-to-square"></i></button>
                 </div>
             </div>
         </div>
 
         <div class="mb-3">
             <input type="hidden" name="uidl" id="uidl" value="<%= data.restaurant[0].IdRestaurant %>">
-            <textarea class="form-control" rows="3"><%= JSON.stringify(data.restaurant) %></textarea>
+            <textarea class="form-control" rows="3" hidden><%= JSON.stringify(data.restaurant) %></textarea>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>IdRestaurant</th>
+                                <td><%= rest.IdRestaurant; %></td>
+                                <th>Name</th>
+                                <td><%= rest.Name %></td>
+                                <th>Open Now</th>
+                                <td><% var state = (rest.OpenNow == true) ? 0 : 1; var openIco = "fa-store"; var openColor = "text-success-cool"; %>
+                                    <% if(rest.OpenNow == false) { openIco = "fa-store-slash"; openColor = "text-danger-cool"; } %>
+                                    <i class="fa-solid <%= openIco %> <%= openColor %> fa-lg"></i>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Address</th>
+                                <td><%= rest.Address; %></td>
+                                <th>Zone</th>
+                                <td><%= rest.Zone %></td>
+                                <th>LocationMap</th>
+                                <td><%= rest.LocationMap %></td>
+                            </tr>
+                            <tr>
+                                <th>City</th>
+                                <td><%= rest.City %></td>
+                                <th>State</th>
+                                <td><%= rest.State %></td>
+                                <th>Country</th>
+                                <td><%= rest.Country; %></td>
+                            </tr>
+                            <tr>
+                                <th>PaymentMethod</th>
+                                <td><%= rest.PaymentMethod %></td>
+                                <th>ServiceOptions</th>
+                                <td><%= rest.ServiceOptions %></td>
+                                <th>Schedule</th>
+                                <td><%= rest.Schedule; %></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <div class="col-lg-12 col-md-12 col-xs-12 mt-3">
-            <div class="card"><!-- border-0 -->
+            <div class="card">
                 <div class="card-body">
                     <div id="toolbar" class="btn-group" role="group" aria-label="Basic example">
                         <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddMenu"><i class="fa fa-plus"></i></button>
-                        <!-- <button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-user-check"></i></button> -->
                     </div>
 
                     <table
@@ -38,6 +82,9 @@
                         <thead>
                             <tr>
                                 <th data-field="IdMenu">IdMenu</th>
+                                <th data-field="IdCategory" data-visible="false">IdCategory</th>
+                                <th data-field="IsActive" data-visible="false">IsActive</th>
+                                <th data-field="IdRestaurant" data-visible="false">IdRestaurant</th>
                                 <th data-field="Category">Category</th>
                                 <th data-field="Name">Name</th>
                                 <th data-field="Price">Price</th>
@@ -50,11 +97,20 @@
                             <% data.menus.map((menu) => { %>
                             <tr>
                                 <td><%= menu.IdMenu %></td>
+                                <td><%= menu.IdCategory %></td>
+                                <td><%= menu.IsActive %></td>
+                                <td><%= menu.IdRestaurant %></td>
                                 <td><%= menu.Category %></td>
                                 <td><%= menu.Name %></td>
                                 <td><%= menu.Price %></td>
                                 <td><%= menu.Observations %></td>
-                                <td><%- menu.IsActive %></td>
+                                <td>
+                                    <% var icon  = menu.IsActive == 1 ? "fa-check" : "fa-ban";  %>
+                                    <% var color = menu.IsActive == 1 ? "text-success": "text-danger-cool";  %>
+                                    <% var check = menu.IsActive == 1 ? 0 : 1;  %>
+                                    <% var showData = JSON.stringify({id: menu.IdMenu, isActive: check}); %>
+                                    <div id="i-<%=menu.IdMenu%>"><i class="fa-solid <%=icon%> <%=color%> showMenu" data-id="<%=showData%>" style="cursor: pointer;"></i></div>
+                                </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="restaurant options">
                                         <button type="button" class="btn btn-sm btn-outline-primary menuContent" data-id="<%= menu.IdMenu %>"><i class="fa-solid fa-plate-wheat"></i></button>
@@ -75,6 +131,7 @@
     scripts: [
         'https://unpkg.com/bootstrap-table@1.21.1/dist/bootstrap-table.min.js',
         'https://unpkg.com/bootstrap-table@1.20.2/dist/locale/bootstrap-table-es-MX.min.js',
+        'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
         '/js/restaurant.js'
     ]
 }); %>

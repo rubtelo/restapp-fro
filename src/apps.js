@@ -32,3 +32,4 @@ const server = app.listen(app.get('port'), () => {
 app.use("/", require('./routes/index'));
 app.use("/restaurants", require('./routes/restaurants'));
 app.use("/clients", require('./routes/clients'));
+app.use("/settings", require('./routes/settings'));

@@ -60,8 +60,8 @@
                                 <td><%= rest.State %></td>
                                 <td><%= rest.City %></td>
                                 <td><%= rest.Address %></td>
-                                <td><% var openIco = "fa-store"; var openColor = "text-success"; var openData = JSON.stringify({id: rest.IdRestaurant, open: rest.OpenNow}); %>
-                                    <% if(rest.OpenNow == false) { openIco = "fa-store-slash"; openColor = "text-danger"; } %>
+                                <td><% var state = (rest.OpenNow == true) ? 0 : 1; var openIco = "fa-store"; var openColor = "text-success"; var openData = JSON.stringify({id: rest.IdRestaurant, open: state}); %>
+                                    <% if(rest.OpenNow == false) { openIco = "fa-store-slash"; openColor = "text-danger-cool"; } %>
                                     <i class="fa-solid <%= openIco %> <%= openColor %> fa-lg open-check" data-open="<%= openData %>" style="cursor:pointer;"></i>
                                 </td>
                                 <td><%- rest.IsActive %></td>

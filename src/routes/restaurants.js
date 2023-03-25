@@ -43,6 +43,7 @@ router.get('/details/:id', verifySession(), async (req, res) => {
 
     // get menus
     const menus = await restaurantController.getMenus(req.session.token, { IdRestaurant: Id });
+
     const data = { menus: menus.rows, restaurant: restaurant.rows, user };
 
     sessionView.renderView(req, res, "restaurant/details", "Clients", data);
@@ -74,6 +75,23 @@ router.post('/addMenu', verifySession(), async (req, res) => {
     });
 
     const data = await restaurantController.addMenu(req.session.token, { menu: req.body });
+    return res.status(200).json({success: data.success, message: data.message});
+});
+
+
+// edit menu
+router.put('/editMenu', verifySession(), async (req, res) => {
+    if(!req.body.name) return res.status(202).json({
+        success: false,
+        message: 'indicate name'
+    });
+
+    if(!req.body.price) return res.status(202).json({
+        success: false,
+        message: 'indicate price'
+    });
+
+    const data = await restaurantController.updMenu(req.session.token, { menu: req.body });
     return res.status(200).json({success: data.success, message: data.message});
 });
 
@@ -114,6 +132,31 @@ router.delete('/content', verifySession(), async (req, res) => {
     });
 
     const data = await restaurantController.delMenuContent(req.session.token, {id});
+    return res.status(200).json({success: data.success, message: data.message});
+});
+
+
+// open now
+router.put('/open', verifySession(), async (req, res) => {
+    const open = req.body;
+    if(!open) return res.status(202).json({
+        success: false,
+        message: `incomplete fields`
+    });
+
+    const data = await restaurantController.openNowExec(req.session.token, open);
+    return res.status(200).json({success: data.success, message: data.message});
+});
+
+
+// show menu
+router.put('/showmenu', verifySession(), async (req, res) => {
+    const show = req.body;
+    if(!show) return res.status(202).json({
+        success: false,
+        message: `incomplete fields`
+    });
+    const data = await restaurantController.showMenu(req.session.token, show);
     return res.status(200).json({success: data.success, message: data.message});
 });
 

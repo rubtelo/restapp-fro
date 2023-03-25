@@ -15,14 +15,14 @@ var rowsOptionsClients = (value, row, index) => {
 
 
 var openNow = (data) => {
-    console.log('data :>> ', data);
-    return false;
-    const cnfDc = { url: '/restaurants/content', params: {id}, type: 'delete' };
-    const delContent = execAjax(cnfDc);
-    if(delContent.success == true) { 
-        const rowId = document.querySelector(`#c_${id}`);
-        const row = rowId.parentNode.parentNode;
-        row.remove();
+    var check = data.open == 1 ? "Open" : "Close";
+    var dialog = confirm(`${check} restaurant?`);
+    if (dialog) {
+        const cnfOp = { url: '/restaurants/open', params: data, type: 'put' };
+        const openExe = execAjax(cnfOp);
+        if(openExe.success == true) { 
+            location.reload();
+        }
     }
 };
 
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
     /* buttons */
     const btnAddRestaurant = document.getElementById("btnAddRestaurant");
     const btnAddClient = document.getElementById("btnAddClient");
-    // const btnOpenNow = document.getElementsByClassName("open-check");
     let btnOpenNow = document.querySelectorAll(".open-check");
 
     // bootstrap-table
@@ -53,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         contenido += '    </div>';
         contenido += '    <div class="col-6">';
         contenido += '        <label for="field" class="form-label">region</label>';
-        contenido += '        <select class="form-select" aria-label="region client" name="idRegion" id="idRegion">';
+        contenido += '        <select class="form-select select2" aria-label="region client" name="idRegion" id="idRegion">';
         contenido += '            <option value="" disabled selected>Select...</option>';
         listRegion.map((region) => {
         contenido += `            <option value="${region.IdRegion}" data-reg="${JSON.stringify(region)}">${region.City} - ${region.State}</option>`;
@@ -99,6 +98,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('.modal-header').classList.add(...cls);
         document.querySelector('.modal-title').innerHTML = "add client";
         document.querySelector('.modal-body').innerHTML = contenido;
+
+        // select2
+        $('.select2').select2({ dropdownParent: $('#modalGral') });
 
         var myModal = new bootstrap.Modal(document.querySelector('.modal'), { keyboard: false, backdrop: "static" });
         myModal.show();
@@ -202,6 +204,9 @@ document.addEventListener('DOMContentLoaded', function () {
             ajax: { url: '/paymethods', dataType: 'json' },
             dropdownParent: $('#modalGral')
         });
+
+        // select2
+        $('#region').select2({ dropdownParent: $('#modalGral') });
 
         var myModal = new bootstrap.Modal(document.querySelector('.modal'), { keyboard: false, backdrop: "static" });
         myModal.show();
